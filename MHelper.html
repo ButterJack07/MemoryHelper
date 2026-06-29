@@ -156,6 +156,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 .stop-btn{display:none;background:#ef4444;border:none;color:#fff;width:36px;height:36px;border-radius:6px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-end}
 .stop-btn.show{display:flex}
 .stop-btn:hover{background:#dc2626}
+.preset-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.preset-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:5px;cursor:pointer;font-size:12px;transition:.15s;font-family:inherit;display:flex;align-items:center;gap:4px}
+.preset-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
 
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center}
@@ -192,6 +195,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
       <input type="file" accept=".md" onchange="loadFile(event)">
     </label>
     <span class="file-name" id="fileName"></span>
+    <button class="btn btn-sm" onclick="forgetFile()" title="忘记已保存的文件" style="font-size:13px;padding:2px 8px;line-height:1">×</button>
     <button class="btn btn-sm" onclick="toggleModal()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       设置
@@ -257,6 +261,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
+      <div class="preset-row">
+        <button class="preset-btn" onclick="setPreset('讲解概念')">📖 讲解概念</button>
+        <button class="preset-btn" onclick="setPreset('对比分析')">⚖️ 对比分析</button>
+        <button class="preset-btn" onclick="setPreset('总结概要')">📝 总结概要</button>
+      </div>
     </div>
   </div>
 </div>
@@ -273,8 +282,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
       <input type="password" id="apiKey" placeholder="sk-...">
     </div>
     <div class="field">
-      <label>模型名（按 API 要求填写）</label>
-      <input type="text" id="modelInput" placeholder="gpt-4o / deepseek-chat / claude-3-opus...">
+      <label>模型名</label>
+      <input type="text" id="modelInput" placeholder="gpt-4o / deepseek-chat / claude-sonnet...">
     </div>
     <div class="field">
       <label>温度</label>
@@ -294,6 +303,7 @@ let questions = []
 let currentMode = 'assist'
 let currentQuestionIdx = -1
 let questionChats = {}  // { idx: [messages] }
+let doneQuestions = new Set()  // indices of manually marked complete
 let isGenerating = false
 let abortController = null
 let hasSentIntro = {}  // { idx: true }
@@ -302,7 +312,10 @@ const KEYS = {
   API_BASE: 'mksz_api_base',
   API_KEY: 'mksz_api_key',
   MODEL: 'mksz_model',
-  TEMP: 'mksz_temp'
+  TEMP: 'mksz_temp',
+  CONTENT: 'mhelper_content',
+  FNAME: 'mhelper_fname',
+  QUESTIONS: 'mhelper_questions'
 }
 
 // === DOM refs ===
@@ -388,7 +401,11 @@ function loadFile(e) {
   const reader = new FileReader()
   reader.onload = function(ev) {
     rawMd = ev.target.result
+    localStorage.setItem(KEYS.CONTENT, rawMd)
+    localStorage.setItem(KEYS.FNAME, file.name)
     questions = parseQuestions(rawMd)
+    doneQuestions = new Set()
+    saveProgress()
     document.getElementById('leftPanel').classList.toggle('narrow', currentMode === 'quiz')
     document.getElementById('questionList').style.display = 'none'
     document.getElementById('aiExtractBtn').style.display = currentMode === 'quiz' ? 'inline-flex' : 'none'
@@ -572,12 +589,7 @@ function renderQuestionList() {
 
     const status = document.createElement('span')
     status.className = 'ql-status'
-    const msgs = questionChats[i]
-    if (msgs && msgs.length >= 2) {
-      status.classList.add('done')
-    } else if (msgs && msgs.length > 0) {
-      status.classList.add('partial')
-    }
+    if (doneQuestions.has(i)) status.classList.add('done')
 
     const num = document.createElement('span')
     num.className = 'ql-num'
@@ -586,12 +598,25 @@ function renderQuestionList() {
     const title = document.createElement('span')
     title.textContent = q.title
 
+    status.onclick = function(e) {
+      e.stopPropagation()
+      if (doneQuestions.has(i)) doneQuestions.delete(i)
+      else doneQuestions.add(i)
+      this.classList.toggle('done')
+      saveProgress()
+    }
+
     item.appendChild(status)
     item.appendChild(num)
     item.appendChild(title)
     item.onclick = () => showQuestion(i)
     el.appendChild(item)
   }
+}
+
+function saveProgress() {
+  const data = { questions, done: [...doneQuestions] }
+  localStorage.setItem(KEYS.QUESTIONS, JSON.stringify(data))
 }
 
 // === Chat management ===
@@ -689,6 +714,23 @@ function handleKey(e) {
   }
 }
 
+function setPreset(type) {
+  const prompts = {
+    '讲解概念': '请详细讲解这段内容的核心概念，帮助我理解',
+    '对比分析': '请对比分析这段内容中的相关概念或观点，指出异同',
+    '总结概要': '请用简洁的语言总结这段内容的要点'
+  }
+  const sel = selectionText.textContent
+  if (!sel || sel === '在左侧 MD 中划选文字，会自动显示在这里') {
+    showToast('请先在左侧 MD 中划选文字')
+    return
+  }
+  inputEl.value = prompts[type] || type
+  inputEl.dataset.autoFill = 'false'
+  autoResize(inputEl)
+  inputEl.focus()
+}
+
 // === Navigation ===
 function nextQuestion() {
   if (currentQuestionIdx < questions.length - 1) {
@@ -715,22 +757,19 @@ function buildSystemPrompt() {
 
 你是一位耐心的老师，目标是帮助学生真正理解而非死记硬背。`
   } else {
-    return `你是一位严格的背诵检查老师。你的唯一标准是：对照提纲中的参考答案，逐条逐句检查学生的默写。
+    return `你是一位背诵辅导老师。对照参考答案检查学生默写，但重点是整体理解和逻辑通顺，而非逐字逐句。
 
 核心规则：
-1. 学生每道题都有对应的标准答案（在参考答案中给出）。
-2. 你必须在参考答案中逐句核对学生的默写：
-   - 标出学生遗漏了哪些关键点
-   - 标出学生表述不准确或错误的地方
-   - 标出学生混淆的概念
-3. 回复格式（每次必须包含）：
-   ✅ 正确部分：（列出学生答对的内容，给予肯定）
-   ❌ 问题：（逐条列出遗漏、错误或表述不准确的地方，具体到关键词）
-   💡 提示：（针对每个问题给出引导性提示，不要直接告诉答案）
-4. 只有学生完整答出参考答案中80%以上的关键点时，才给予鼓励并建议进入下一题。
-5. 如果学生偏离参考答案较远，重新引导回到提纲内容。
-6. 每次回复聚焦最重要的2-3个问题，不要一次性说太多。
-7. 态度保持严格但鼓励，目标是让学生精准掌握提纲内容，不能模棱两可。`
+1. 学生逐题背诵，你拿到题目的参考答案。
+2. 检查学生的默写时：
+   - 如果整体逻辑通顺、核心要点基本覆盖（约90%）、没有重大理解错误 → 给予鼓励，建议进入下一题
+   - 如果有遗漏或错误 → 指出问题所在，给出引导性提示
+   - 如果有重大错误（概念混淆、方向性错误）→ 必须纠正
+3. 回复格式：
+   ✅ 正确部分：（肯定学生做得好的地方）
+   💡 改进：（指出需要补充或调整的地方，用提示引导）
+4. 不需要抠字眼，意思对即可。目标是让学生理解并记住核心内容，而非死记硬背。
+5. 保持耐心、鼓励的态度。`
   }
 }
 
@@ -791,7 +830,7 @@ async function send() {
     }
   } else {
     const selText = selectionText.textContent
-    if (selText && selText !== '在左侧 MD 中划选文字，会自动显示在这里' && text.includes('讲解')) {
+    if (selText && selText !== '在左侧 MD 中划选文字，会自动显示在这里') {
       msgs.push({ role: 'system', content: `学生选中的参考文字：\n${selText}` })
     }
     for (const m of (window._assistHistory || [])) {
@@ -932,7 +971,7 @@ async function aiExtractQuestions() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
       body: JSON.stringify({
-        model: modelInput.value,
+        model: modelInput.value || 'deepseek-chat',
         messages: [
           { role: 'system', content: '你是严格JSON提取器。只做一件事：从用户提供的资料中提取所有题目，输出一个JSON数组。\n\n你必须严格遵守以下规则：\n1. 只输出JSON数组本身，禁止任何其他文字、解释、注释\n2. 禁止使用markdown代码块包裹（不要```json和```）\n3. 数组元素格式：\n{\n  "number": 1,\n  "title": "物质的定义",\n  "section": "第一章 世界的物质性",\n  "content": "物质是客观实在的哲学范畴..."\n}\n\n说明：\n- number: 题号（数字）\n- title: 题目完整名称\n- section: 所属章节，如"第一章 世界的物质性"、"第二章 认识论"，根据资料中的章节目录判断。注意：不要使用"名词解释""简答""论述"等题型分类作为section，要用章节名。\n- content: 该题对应的答案原文，完整提取不要截断\n4. 提取全部题目，一个不能少\n5. 如果某题没有答案原文，content填空字符串\n\n现在只输出JSON数组，不要任何其他内容。' },
           { role: 'user', content: rawMd }
@@ -967,6 +1006,8 @@ async function aiExtractQuestions() {
       content: q.content || '',
       raw: ''
     }))
+    doneQuestions = new Set()
+    saveProgress()
 
     questionChats = {}
     hasSentIntro = {}
@@ -985,6 +1026,25 @@ async function aiExtractQuestions() {
   }
 }
 
+function forgetFile() {
+  localStorage.removeItem(KEYS.CONTENT)
+  localStorage.removeItem(KEYS.FNAME)
+  localStorage.removeItem(KEYS.QUESTIONS)
+  doneQuestions = new Set()
+  rawMd = ''
+  questions = []
+  questionChats = {}
+  currentQuestionIdx = -1
+  fileName.textContent = ''
+  leftContent.innerHTML = '<div class="no-file"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><p>点击右上角「选择 MD 文件」加载复习资料</p></div>'
+  leftContent.style.display = ''
+  document.getElementById('questionList').style.display = 'none'
+  document.getElementById('aiExtractBtn').style.display = 'none'
+  document.getElementById('leftPanel').classList.remove('narrow')
+  chatEl.innerHTML = '<div class="msg system"><div class="bubble">在左侧 MD 中划选文字，然后问我问题。也可以直接输入任何问题。</div></div>'
+  showToast('已清除文件')
+}
+
 function showToast(msg) {
   const old = document.querySelector('.toast')
   if (old) old.remove()
@@ -993,6 +1053,39 @@ function showToast(msg) {
   el.textContent = msg
   document.body.appendChild(el)
   setTimeout(() => el.remove(), 2000)
+}
+
+// Restore saved content
+const savedContent = localStorage.getItem(KEYS.CONTENT)
+const savedName = localStorage.getItem(KEYS.FNAME)
+const savedQuestions = localStorage.getItem(KEYS.QUESTIONS)
+if (savedContent) {
+  rawMd = savedContent
+  fileName.textContent = savedName || '已保存的文件'
+  if (savedQuestions) {
+    const parsed = JSON.parse(savedQuestions)
+    if (Array.isArray(parsed)) {
+      questions = parsed
+      doneQuestions = new Set()
+    } else {
+      questions = parsed.questions || []
+      doneQuestions = new Set(parsed.done || [])
+    }
+  } else {
+    questions = parseQuestions(rawMd)
+  }
+  document.getElementById('leftPanel').classList.toggle('narrow', currentMode === 'quiz')
+  if (currentMode === 'assist') {
+    renderMd()
+  } else if (questions.length > 0) {
+    currentQuestionIdx = 0
+    leftContent.style.display = 'none'
+    document.getElementById('questionList').style.display = 'block'
+    document.getElementById('aiExtractBtn').style.display = 'inline-flex'
+    renderQuestionList()
+    showQuestion(0)
+  }
+  renderCurrentChat()
 }
 
 // Init
