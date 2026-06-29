@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI MHelper</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f6f8;color:#1a1a2e;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+:root{--accent:#4f6cf7;--accent-hover:#3b5de7;--accent-light:#eef1ff;--bg:#fff;--bg2:#f8f9fa;--text:#1a1a2e;--text2:#6b7280;--text3:#9ca3af;--border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:8px}
+
+/* Header */
+.header{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-left h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.header-left h1 span{color:var(--accent)}
+.logo-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+.header-center{display:flex;align-items:center;gap:10px;flex:1;justify-content:center}
+.mode-group{display:flex;background:var(--bg2);border-radius:8px;padding:2px;border:1px solid var(--border)}
+.mode-btn{padding:6px 18px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);transition:.15s;font-weight:500}
+.mode-btn.active{background:#fff;color:var(--text);box-shadow:var(--shadow)}
+.mode-btn:hover:not(.active){color:var(--text)}
+.header-right{display:flex;align-items:center;gap:8px}
+.btn{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s;display:flex;align-items:center;gap:5px;font-weight:500}
+.btn:hover{background:var(--border)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-ghost{border:none;background:transparent;padding:6px 10px}
+.btn-ghost:hover{background:var(--bg2)}
+.file-label{cursor:pointer;display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;font-size:13px;font-weight:500;transition:.15s}
+.file-label:hover{background:var(--border)}
+.file-label input{display:none}
+.file-name{font-size:12px;color:var(--text2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Main */
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 56px)}
+
+/* Left Panel */
+.left-panel{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border-right:1px solid var(--border)}
+.left-panel.narrow{flex:0 0 500px;width:500px}
+.left-panel.hidden{display:none}
+.left-header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
+.left-header span{font-size:13px;font-weight:600;color:var(--text2)}
+.question-nav{display:flex;align-items:center;gap:8px;font-size:13px}
+.question-nav button{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:.15s}
+.question-nav button:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.question-nav button:disabled{opacity:.3;cursor:not-allowed}
+.question-nav button:disabled:hover{background:#fff;border-color:var(--border);color:var(--text3)}
+.question-nav .q-label{font-size:13px;font-weight:500}
+.question-nav .q-total{color:var(--text3);font-size:12px}
+.left-content{flex:1;overflow-y:auto;padding:20px;line-height:1.8;font-size:14px;color:var(--text)}
+.left-content::-webkit-scrollbar{width:6px}
+.left-content::-webkit-scrollbar-track{background:transparent}
+.left-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.left-content h1,.left-content h2,.left-content h3,.left-content h4{color:var(--text);margin:16px 0 8px}
+.question-list{flex:1;overflow-y:auto;padding:6px 0}
+.question-list::-webkit-scrollbar{width:6px}
+.question-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.ql-section{padding:5px 16px 3px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg2);border-bottom:1px solid var(--border);margin-top:4px;position:sticky;top:0;z-index:1}
+.ql-item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;transition:.1s;border-left:3px solid transparent;font-size:13px;line-height:1.4}
+.ql-item:hover{background:var(--bg2)}
+.ql-item.active{background:var(--accent-light);border-left-color:var(--accent);font-weight:600;color:var(--accent)}
+.ql-item .ql-status{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid var(--border);margin-top:1px}
+.ql-item .ql-status.done{border-color:#10b981;background:#10b981}
+.ql-item .ql-status.partial{border-color:var(--accent);background:var(--accent)}
+.ql-item .ql-num{color:var(--text3);font-size:12px;min-width:22px;flex-shrink:0}
+.ql-item.active .ql-num{color:var(--accent)}
+#aiExtractBtn:disabled{opacity:.5;cursor:wait}
+@keyframes spin{to{transform:rotate(360deg)}}
+.left-content h2{padding-bottom:6px;border-bottom:2px solid var(--accent-light)}
+.left-content p{margin:6px 0}
+.left-content pre{background:var(--bg2);border-radius:6px;padding:12px;overflow-x:auto;border:1px solid var(--border);margin:8px 0}
+.left-content pre code{background:transparent;padding:0;font-size:13px}
+.left-content code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:13px}
+.left-content ul,.left-content ol{padding-left:20px;margin:6px 0}
+.left-content blockquote{border-left:3px solid var(--accent);padding-left:12px;color:var(--text2);margin:6px 0}
+.left-content table{border-collapse:collapse;margin:8px 0;width:100%}
+.left-content th,.left-content td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+.left-content th{background:var(--bg2)}
+.left-content strong{color:var(--text)}
+.left-content ::selection{background:#b3d4ff}
+.no-file{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:12px}
+.no-file svg{opacity:.4}
+.no-file p{font-size:14px}
+.empty-questions{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:14px;flex-direction:column;gap:8px}
+
+/* Right Panel */
+.right-panel{flex:1;display:flex;flex-direction:column;background:var(--bg);min-width:0}
+.right-panel.full{width:100%}
+.right-panel.hidden{display:none}
+
+.right-context{border-bottom:1px solid var(--border);padding:10px 16px;flex-shrink:0;background:var(--bg2)}
+.right-context .ctx-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.right-context .ctx-content{font-size:13px;color:var(--text2);line-height:1.5;max-height:60px;overflow-y:auto;background:#fff;border-radius:4px;padding:6px 10px;border:1px solid var(--border);word-break:break-all}
+.right-context .ctx-content::-webkit-scrollbar{width:4px}
+.right-context .ctx-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.right-context .q-title{font-size:14px;font-weight:600;color:var(--text);padding:4px 0}
+.right-context .q-meta{display:flex;align-items:center;gap:10px;margin-top:4px}
+.right-context .q-controls{display:flex;gap:6px;margin-top:6px}
+
+.chat{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.chat::-webkit-scrollbar{width:6px}
+.chat::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.chat::-webkit-scrollbar-track{background:transparent}
+
+.msg{display:flex;gap:8px;max-width:100%;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.msg .avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.msg.assistant .avatar{background:var(--accent);color:#fff}
+.msg.user .avatar{background:var(--text2);color:#fff}
+.msg .bubble{background:var(--bg2);padding:8px 12px;border-radius:8px;font-size:14px;line-height:1.7;overflow-wrap:break-word;max-width:calc(100% - 36px)}
+.msg.user .bubble{background:var(--accent-light);border-bottom-right-radius:2px}
+.msg.assistant .bubble{border-bottom-left-radius:2px}
+.bubble p{margin:4px 0}
+.bubble p:first-child{margin-top:0}
+.bubble p:last-child{margin-bottom:0}
+.bubble pre{background:#f6f8fa;border:1px solid var(--border);border-radius:6px;padding:10px;overflow-x:auto;margin:6px 0}
+.bubble pre code{background:transparent;padding:0;font-size:13px}
+.bubble code{background:#f0f2f5;padding:1px 5px;border-radius:4px;font-size:13px}
+.bubble ul,.bubble ol{padding-left:18px;margin:4px 0}
+.bubble blockquote{border-left:3px solid var(--accent);padding-left:10px;color:var(--text2);margin:4px 0}
+.bubble strong{color:var(--text)}
+.bubble hr{border:none;border-top:1px solid var(--border);margin:8px 0}
+.bubble table{border-collapse:collapse;margin:6px 0;font-size:13px;width:100%}
+.bubble th,.bubble td{border:1px solid var(--border);padding:4px 8px}
+.bubble th{background:var(--bg2)}
+
+/* System message in chat */
+.msg.system{justify-content:center}
+.msg.system .bubble{background:transparent;color:var(--text3);font-size:13px;text-align:center;padding:4px 12px;max-width:100%;font-style:italic}
+
+.typing-dots{display:flex;gap:4px;padding:4px 0}
+.typing-dots .dot{width:6px;height:6px;background:var(--text3);border-radius:50%;animation:bounce 1.2s infinite}
+.typing-dots .dot:nth-child(2){animation-delay:.15s}
+.typing-dots .dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+
+.input-area{padding:10px 16px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.selection-display{background:var(--bg2);border-radius:6px;border:1px solid var(--border);padding:6px 10px;margin-bottom:8px;display:none}
+.selection-display.show{display:block}
+.selection-display .sel-label{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:2px}
+.selection-display .sel-text{font-size:13px;color:var(--text2);line-height:1.5;max-height:60px;overflow-y:auto;word-break:break-all}
+.input-wrap{display:flex;gap:6px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);padding:3px;transition:.15s}
+.input-wrap:focus-within{border-color:var(--accent)}
+.input-wrap textarea{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;font-family:inherit;padding:8px 12px;resize:vertical;min-height:200px;max-height:400px;line-height:1.6}
+.input-wrap textarea::placeholder{color:var(--text3)}
+.input-wrap button{background:var(--accent);border:none;color:#fff;width:36px;height:36px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;align-self:flex-end}
+.input-wrap button:hover{background:var(--accent-hover)}
+.input-wrap button:disabled{opacity:.4;cursor:not-allowed}
+.input-wrap button svg{width:16px;height:16px}
+.stop-btn{display:none;background:#ef4444;border:none;color:#fff;width:36px;height:36px;border-radius:6px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-end}
+.stop-btn.show{display:flex}
+.stop-btn:hover{background:#dc2626}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:480px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal h2{font-size:18px;margin-bottom:16px}
+.modal .field{margin-bottom:14px}
+.modal .field label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.modal .field input,.modal .field select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;transition:.15s;font-family:inherit}
+.modal .field input:focus,.modal .field select:focus{border-color:var(--accent)}
+.modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+
+/* Toast */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;animation:fadeIn .2s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-icon">M</div>
+    <h1><span>MHelper</span></h1>
+  </div>
+  <div class="header-center">
+    <div class="mode-group">
+      <button class="mode-btn active" data-mode="assist" onclick="switchMode('assist')">辅助模式</button>
+      <button class="mode-btn" data-mode="quiz" onclick="switchMode('quiz')">问答模式</button>
+    </div>
+  </div>
+  <div class="header-right">
+    <label class="file-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      选择 MD 文件
+      <input type="file" accept=".md" onchange="loadFile(event)">
+    </label>
+    <span class="file-name" id="fileName"></span>
+    <button class="btn btn-sm" onclick="toggleModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      设置
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left-panel" id="leftPanel">
+    <div class="left-header">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="leftHeaderTitle">参考材料</span>
+        <button class="btn btn-sm" id="aiExtractBtn" onclick="aiExtractQuestions()" style="display:none">AI 提取题目</button>
+      </div>
+      <div class="question-nav" id="questionNav" style="display:none">
+        <button id="prevBtn" onclick="prevQuestion()">&larr;</button>
+        <span class="q-label" id="qNavLabel">0 / 0</span>
+        <button id="nextBtn" onclick="nextQuestion()">&rarr;</button>
+      </div>
+    </div>
+    <div class="left-content" id="leftContent">
+      <div class="no-file">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        <p>点击右上角「选择 MD 文件」加载复习资料</p>
+      </div>
+    </div>
+    <div class="question-list" id="questionList" style="display:none"></div>
+  </div>
+
+  <div class="right-panel" id="rightPanel">
+    <div class="right-context" id="rightContext">
+      <div id="assistContext" style="display:block">
+        <div class="ctx-label">选中文字</div>
+        <div class="ctx-content" id="selectionText">在左侧 MD 中划选文字，会自动显示在这里</div>
+      </div>
+      <div id="quizContext" style="display:none">
+        <div class="ctx-label">当前题目</div>
+        <div class="q-title" id="qTitle">请先加载 MD 文件</div>
+        <div class="q-meta">
+          <span style="font-size:12px;color:var(--text3)" id="qSection"></span>
+          <span style="font-size:12px;color:var(--text3)" id="qNumber"></span>
+        </div>
+        <div class="q-controls" id="qControls" style="display:none">
+          <button class="btn btn-sm" onclick="prevQuestion()">&larr; 上一题</button>
+          <button class="btn btn-sm btn-primary" onclick="nextQuestion()">下一题 &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat" id="chat"></div>
+
+    <div class="input-area">
+      <div class="selection-display" id="selectionDisplay">
+        <div class="sel-label">选中文字</div>
+        <div class="sel-text" id="selectedTextDisplay"></div>
+      </div>
+      <div class="input-wrap">
+        <textarea id="input" rows="1" placeholder="输入消息..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button id="stopBtn" class="stop-btn" onclick="stopGeneration()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        </button>
+        <button id="sendBtn" onclick="send()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>设置</h2>
+    <div class="field">
+      <label>API Base URL</label>
+      <input type="text" id="apiBase" placeholder="https://api.deepseek.com">
+    </div>
+    <div class="field">
+      <label>API Key</label>
+      <input type="password" id="apiKey" placeholder="sk-...">
+    </div>
+    <div class="field">
+      <label>模型名（按 API 要求填写）</label>
+      <input type="text" id="modelInput" placeholder="gpt-4o / deepseek-chat / claude-3-opus...">
+    </div>
+    <div class="field">
+      <label>温度</label>
+      <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.7">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="toggleModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// === State ===
+let rawMd = ''
+let questions = []
+let currentMode = 'assist'
+let currentQuestionIdx = -1
+let questionChats = {}  // { idx: [messages] }
+let isGenerating = false
+let abortController = null
+let hasSentIntro = {}  // { idx: true }
+
+const KEYS = {
+  API_BASE: 'mksz_api_base',
+  API_KEY: 'mksz_api_key',
+  MODEL: 'mksz_model',
+  TEMP: 'mksz_temp'
+}
+
+// === DOM refs ===
+const chatEl = document.getElementById('chat')
+const inputEl = document.getElementById('input')
+const sendBtn = document.getElementById('sendBtn')
+const stopBtn = document.getElementById('stopBtn')
+const leftContent = document.getElementById('leftContent')
+const leftHeader = document.getElementById('leftHeaderTitle')
+const questionNav = document.getElementById('questionNav')
+const qNavLabel = document.getElementById('qNavLabel')
+const qTitle = document.getElementById('qTitle')
+const qSection = document.getElementById('qSection')
+const qNumber = document.getElementById('qNumber')
+const qControls = document.getElementById('qControls')
+const assistContext = document.getElementById('assistContext')
+const quizContext = document.getElementById('quizContext')
+const selectionDisplay = document.getElementById('selectionDisplay')
+const selectedTextDisplay = document.getElementById('selectedTextDisplay')
+const selectionText = document.getElementById('selectionText')
+const fileName = document.getElementById('fileName')
+const apiBase = document.getElementById('apiBase')
+const apiKey = document.getElementById('apiKey')
+const modelInput = document.getElementById('modelInput')
+const temperature = document.getElementById('temperature')
+
+// === Settings persistence ===
+apiBase.value = localStorage.getItem(KEYS.API_BASE) || ''
+apiKey.value = localStorage.getItem(KEYS.API_KEY) || ''
+modelInput.value = localStorage.getItem(KEYS.MODEL) || ''
+temperature.value = localStorage.getItem(KEYS.TEMP) || '0.7'
+
+function saveSettings() {
+  localStorage.setItem(KEYS.API_BASE, apiBase.value)
+  localStorage.setItem(KEYS.API_KEY, apiKey.value)
+  localStorage.setItem(KEYS.MODEL, modelInput.value)
+  localStorage.setItem(KEYS.TEMP, temperature.value)
+  toggleModal()
+  showToast('设置已保存')
+}
+
+function toggleModal() {
+  document.getElementById('modalOverlay').classList.toggle('open')
+}
+
+// === Mode ===
+function switchMode(mode) {
+  currentMode = mode
+  document.getElementById('leftPanel').classList.toggle('narrow', mode === 'quiz')
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode))
+  assistContext.style.display = mode === 'assist' ? 'block' : 'none'
+  quizContext.style.display = mode === 'quiz' ? 'block' : 'none'
+  questionNav.style.display = mode === 'quiz' && questions.length > 0 ? 'flex' : 'none'
+  selectionDisplay.classList.toggle('show', false)
+  document.getElementById('questionList').style.display = mode === 'quiz' && questions.length > 0 ? 'block' : 'none'
+  leftContent.style.display = mode === 'assist' || !questions.length ? '' : 'none'
+  document.getElementById('aiExtractBtn').style.display = mode === 'quiz' && !!rawMd ? 'inline-flex' : 'none'
+
+  if (mode === 'assist') {
+    leftHeader.textContent = '参考材料'
+    renderMd()
+    renderCurrentChat()
+  } else {
+    leftHeader.textContent = '题目列表'
+    if (questions.length > 0) {
+      if (currentQuestionIdx === -1) currentQuestionIdx = 0
+      showQuestion(currentQuestionIdx)
+    } else {
+      leftContent.innerHTML = '<div class="empty-questions"><p>未检测到题目，请确认 MD 文件格式正确</p></div>'
+      leftContent.style.display = ''
+      document.getElementById('questionList').style.display = 'none'
+      renderCurrentChat()
+    }
+  }
+  inputEl.focus()
+}
+
+// === File loading ===
+function loadFile(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  fileName.textContent = file.name
+  const reader = new FileReader()
+  reader.onload = function(ev) {
+    rawMd = ev.target.result
+    questions = parseQuestions(rawMd)
+    document.getElementById('leftPanel').classList.toggle('narrow', currentMode === 'quiz')
+    document.getElementById('questionList').style.display = 'none'
+    document.getElementById('aiExtractBtn').style.display = currentMode === 'quiz' ? 'inline-flex' : 'none'
+    leftContent.style.display = ''
+    if (currentMode === 'assist') {
+      renderMd()
+    } else {
+      if (questions.length > 0) {
+        currentQuestionIdx = 0
+        questionChats = {}
+        hasSentIntro = {}
+        leftContent.style.display = 'none'
+        document.getElementById('questionList').style.display = 'block'
+        renderQuestionList()
+        showQuestion(0)
+      } else {
+        leftContent.innerHTML = '<div class="empty-questions"><p>未在文件中检测到题目，请检查格式</p></div>'
+        leftContent.style.display = ''
+        questionNav.style.display = 'none'
+        qControls.style.display = 'none'
+      }
+    }
+    renderCurrentChat()
+    inputEl.focus()
+  }
+  reader.readAsText(file, 'UTF-8')
+}
+
+function parseQuestions(md) {
+  const lines = md.split('\n')
+  const questions = []
+  let currentChapter = ''
+  let currentSection = ''
+  let current = null
+
+  const chapterRe = /^#{1,3}\s*(第[一二三四五六七八九十百]+[章节部分篇]|模块[一二三四五六七八九十百]+)\s*(.*)/
+  const subSectionRe = /^#{1,3}\s*[一二三四五六七八九十百]+[、.．]\s*(.+)/
+  const questionRe = /^(?:\*{1,2})?(\d+)[.、．](?:\*{0,2})\s*(.+?)(?:\*{0,2}\s*)?$/
+
+  for (const raw of lines) {
+    const line = raw.trimEnd()
+
+    const cm = line.match(chapterRe)
+    if (cm) {
+      currentChapter = ((cm[2] || cm[1]).trim())
+      currentSection = ''
+      continue
+    }
+
+    const sm = line.match(subSectionRe)
+    if (sm) {
+      currentSection = sm[1].trim()
+      continue
+    }
+
+    const qm = line.match(questionRe)
+    if (qm) {
+      if (current) questions.push(current)
+      const num = parseInt(qm[1])
+      current = {
+        number: num,
+        title: qm[2].trim(),
+        section: currentChapter || currentSection,
+        content: '',
+        raw: line
+      }
+      continue
+    }
+
+    if (current) {
+      current.content += line + '\n'
+    }
+  }
+  if (current) questions.push(current)
+
+  // Also detect bold-style questions like **1. 物质**
+  const altRe = /^\*\*(\d+)[.、．]\s*(.+?)\*\*/
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(altRe)
+    if (m) {
+      const num = parseInt(m[1])
+      if (!questions.find(q => q.number === num && q.title === m[2].trim())) {
+        let content = ''
+        for (let j = i + 1; j < lines.length; j++) {
+          if (lines[j].match(altRe) || lines[j].match(questionRe)) break
+          content += lines[j] + '\n'
+        }
+        questions.push({
+          number: num,
+          title: m[2].trim(),
+          section: '',
+          content: content.trim(),
+          raw: lines[i]
+        })
+      }
+    }
+  }
+
+  questions.sort((a, b) => {
+    const secOrder = { '名词解释': 0, '简答': 1, '论述': 2, '辨析': 3 }
+    const sa = Object.keys(secOrder).find(k => a.section.includes(k))
+    const sb = Object.keys(secOrder).find(k => b.section.includes(k))
+    if (sa !== sb) return (secOrder[sa] ?? 99) - (secOrder[sb] ?? 99)
+    return a.number - b.number
+  })
+
+  return questions
+}
+
+// === Render MD (assist mode) ===
+function renderMd() {
+  if (!rawMd) return
+  const html = marked.parse(rawMd, { breaks: true, gfm: true })
+  leftContent.innerHTML = html
+  leftContent.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b))
+  // Re-attach mouseup for selection
+  leftContent.onmouseup = captureSelection
+}
+
+function captureSelection() {
+  const sel = window.getSelection()
+  const text = sel.toString().trim()
+  if (!text || !leftContent.contains(sel.anchorNode)) return
+  selectionText.textContent = text
+  selectedTextDisplay.textContent = text
+  selectionDisplay.classList.add('show')
+  if (!inputEl.value || inputEl.dataset.autoFill === 'true') {
+    inputEl.value = '讲解这个地方，帮助我理解背诵'
+    inputEl.dataset.autoFill = 'true'
+  }
+  autoResize(inputEl)
+  inputEl.focus()
+}
+
+inputEl.addEventListener('focus', function() {
+  if (this.dataset.autoFill === 'true') {
+    this.value = ''
+    this.dataset.autoFill = 'false'
+    autoResize(this)
+  }
+})
+
+// === Question display (quiz mode) ===
+function showQuestion(idx) {
+  if (idx < 0 || idx >= questions.length) return
+  currentQuestionIdx = idx
+  const q = questions[idx]
+
+  qTitle.textContent = `${q.number}. ${q.title}`
+  qSection.textContent = q.section || ''
+  qNumber.textContent = `第 ${idx + 1}/${questions.length} 题`
+  qNavLabel.textContent = `${idx + 1} / ${questions.length}`
+  qControls.style.display = 'flex'
+  questionNav.style.display = 'flex'
+
+  document.getElementById('prevBtn').disabled = idx === 0
+  document.getElementById('nextBtn').disabled = idx === questions.length - 1
+
+  renderQuestionList()
+  renderCurrentChat()
+}
+
+function renderQuestionList() {
+  const el = document.getElementById('questionList')
+  el.innerHTML = ''
+  let lastSection = ''
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i]
+    const section = q.section || '其他'
+    if (section !== lastSection) {
+      const sh = document.createElement('div')
+      sh.className = 'ql-section'
+      sh.textContent = section || '未分类'
+      el.appendChild(sh)
+      lastSection = section
+    }
+    const item = document.createElement('div')
+    item.className = 'ql-item'
+    item.dataset.idx = i
+    if (i === currentQuestionIdx) item.classList.add('active')
+
+    const status = document.createElement('span')
+    status.className = 'ql-status'
+    const msgs = questionChats[i]
+    if (msgs && msgs.length >= 2) {
+      status.classList.add('done')
+    } else if (msgs && msgs.length > 0) {
+      status.classList.add('partial')
+    }
+
+    const num = document.createElement('span')
+    num.className = 'ql-num'
+    num.textContent = q.number + '.'
+
+    const title = document.createElement('span')
+    title.textContent = q.title
+
+    item.appendChild(status)
+    item.appendChild(num)
+    item.appendChild(title)
+    item.onclick = () => showQuestion(i)
+    el.appendChild(item)
+  }
+}
+
+// === Chat management ===
+function storeMessage(role, content) {
+  if (currentMode === 'quiz') {
+    const idx = currentQuestionIdx
+    if (idx < 0) return
+    if (!questionChats[idx]) questionChats[idx] = []
+    questionChats[idx].push({ role, content })
+  } else {
+    if (!window._assistHistory) window._assistHistory = []
+    window._assistHistory.push({ role, content })
+  }
+}
+
+function addChatMessage(role, content) {
+  storeMessage(role, content)
+  appendMsg(role, content)
+}
+
+function renderCurrentChat() {
+  chatEl.innerHTML = ''
+  if (currentMode === 'quiz') {
+    if (questions.length === 0) {
+      chatEl.innerHTML = '<div class="msg system"><div class="bubble">请先加载 MD 文件</div></div>'
+      return
+    }
+    if (currentQuestionIdx < 0) {
+      chatEl.innerHTML = '<div class="msg system"><div class="bubble">请从左侧题目列表开始</div></div>'
+      return
+    }
+    const msgs = questionChats[currentQuestionIdx]
+    if (msgs && msgs.length > 0) {
+      for (const m of msgs) appendMsg(m.role, m.content)
+    } else {
+      chatEl.innerHTML = '<div class="msg system"><div class="bubble">准备好了吗？写下你的默写内容，我来帮你检查和引导 👇</div></div>'
+    }
+  } else {
+    const h = window._assistHistory
+    if (h && h.length > 0) {
+      for (const m of h) appendMsg(m.role, m.content)
+    } else {
+      chatEl.innerHTML = '<div class="msg system"><div class="bubble">在左侧 MD 中划选文字，然后问我问题。也可以直接输入任何问题。</div></div>'
+    }
+  }
+  scrollToBottom()
+}
+
+function appendMsg(role, content) {
+  const div = document.createElement('div')
+  div.className = `msg ${role}`
+  if (role === 'system') {
+    div.innerHTML = `<div class="bubble">${escapeHtml(content)}</div>`
+  } else {
+    const label = role === 'user' ? 'U' : 'A'
+    div.innerHTML = `<div class="avatar">${label}</div><div class="bubble"></div>`
+    const bubble = div.querySelector('.bubble')
+    if (role === 'assistant') {
+      bubble.appendChild(renderMarkdown(content))
+    } else {
+      bubble.textContent = content
+    }
+  }
+  chatEl.appendChild(div)
+  scrollToBottom()
+  return div
+}
+
+function renderMarkdown(text) {
+  const div = document.createElement('div')
+  div.innerHTML = marked.parse(text, { breaks: true, gfm: true })
+  div.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b))
+  return div
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div')
+  d.textContent = s
+  return d.innerHTML
+}
+
+function scrollToBottom() {
+  requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight })
+}
+
+function autoResize(el) {
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 400) + 'px'
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault()
+    send()
+  }
+}
+
+// === Navigation ===
+function nextQuestion() {
+  if (currentQuestionIdx < questions.length - 1) {
+    showQuestion(currentQuestionIdx + 1)
+  }
+}
+
+function prevQuestion() {
+  if (currentQuestionIdx > 0) {
+    showQuestion(currentQuestionIdx - 1)
+  }
+}
+
+// === API ===
+function buildSystemPrompt() {
+  if (currentMode === 'assist') {
+    return `你是一位课程的辅导老师。学生正在阅读复习资料，遇到不理解的内容需要你讲解。
+
+工作方式：
+1. 学生可能会把不理解的文字发给你，请你解释。
+2. 你需要用通俗易懂的语言解释核心含义，提供背景知识，举例说明，帮助学生理解和记忆。
+3. 如果学生追问，耐心详细解答。
+4. 回答应当清晰有条理、重点突出。
+
+你是一位耐心的老师，目标是帮助学生真正理解而非死记硬背。`
+  } else {
+    return `你是一位严格的背诵检查老师。你的唯一标准是：对照提纲中的参考答案，逐条逐句检查学生的默写。
+
+核心规则：
+1. 学生每道题都有对应的标准答案（在参考答案中给出）。
+2. 你必须在参考答案中逐句核对学生的默写：
+   - 标出学生遗漏了哪些关键点
+   - 标出学生表述不准确或错误的地方
+   - 标出学生混淆的概念
+3. 回复格式（每次必须包含）：
+   ✅ 正确部分：（列出学生答对的内容，给予肯定）
+   ❌ 问题：（逐条列出遗漏、错误或表述不准确的地方，具体到关键词）
+   💡 提示：（针对每个问题给出引导性提示，不要直接告诉答案）
+4. 只有学生完整答出参考答案中80%以上的关键点时，才给予鼓励并建议进入下一题。
+5. 如果学生偏离参考答案较远，重新引导回到提纲内容。
+6. 每次回复聚焦最重要的2-3个问题，不要一次性说太多。
+7. 态度保持严格但鼓励，目标是让学生精准掌握提纲内容，不能模棱两可。`
+  }
+}
+
+function buildQuizContext() {
+  if (currentMode !== 'quiz' || currentQuestionIdx < 0) return ''
+  const q = questions[currentQuestionIdx]
+  return `【当前题目】
+题号：${q.number}
+题目：${q.title}
+所属章节：${q.section || '未分类'}
+
+【参考答案（这是唯一标准，必须严格对照检查）】
+${q.content.trim() || '（材料中未提供详细答案）'}
+
+评判规则：
+- 这是标准答案原文，你必须逐句核对学生的默写
+- 学生漏掉、改错、模糊表述的关键词都要指出
+- 不要因为学生意思接近就放过，必须要求精准
+- 不直接展示参考答案给学生，而是通过提示引导`
+}
+
+async function send() {
+  const text = inputEl.value.trim()
+  if (!text) return
+
+  const key = apiKey.value.trim()
+  const base = apiBase.value.trim()
+  if (!key || !base) {
+    showToast('请先在设置中配置 API Base URL 和 API Key')
+    return
+  }
+
+  inputEl.value = ''
+  inputEl.dataset.autoFill = 'false'
+  autoResize(inputEl)
+  selectionDisplay.classList.toggle('show', false)
+
+  // Add user message
+  addChatMessage('user', text)
+
+  isGenerating = true
+  sendBtn.disabled = true
+  stopBtn.classList.add('show')
+  abortController = new AbortController()
+
+  // Build messages
+  const sysPrompt = buildSystemPrompt()
+  let msgs = [{ role: 'system', content: sysPrompt }]
+
+  if (currentMode === 'quiz') {
+    const qContext = buildQuizContext()
+    if (qContext) {
+      msgs.push({ role: 'system', content: qContext })
+    }
+    const history = questionChats[currentQuestionIdx] || []
+    for (const m of history) {
+      msgs.push({ role: m.role, content: m.content })
+    }
+  } else {
+    const selText = selectionText.textContent
+    if (selText && selText !== '在左侧 MD 中划选文字，会自动显示在这里' && text.includes('讲解')) {
+      msgs.push({ role: 'system', content: `学生选中的参考文字：\n${selText}` })
+    }
+    for (const m of (window._assistHistory || [])) {
+      msgs.push({ role: m.role, content: m.content })
+    }
+  }
+
+  // Typing indicator
+  const typingDiv = document.createElement('div')
+  typingDiv.className = 'msg assistant'
+  typingDiv.innerHTML = '<div class="avatar">A</div><div class="bubble"><div class="typing-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>'
+  chatEl.appendChild(typingDiv)
+  scrollToBottom()
+
+  let fullContent = ''
+
+  try {
+    const body = {
+      model: modelInput.value || 'deepseek-chat',
+      messages: msgs,
+      stream: true,
+      max_tokens: 4096,
+      temperature: parseFloat(temperature.value) || 0.7
+    }
+
+    const resp = await fetch(`${base.replace(/\/+$/, '')}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify(body),
+      signal: abortController.signal
+    })
+
+    if (!resp.ok) {
+      const err = await resp.text()
+      throw new Error(`HTTP ${resp.status}: ${err}`)
+    }
+
+    const reader = resp.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let firstChunk = true
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        const data = line.slice(6).trim()
+        if (data === '[DONE]') continue
+        try {
+          const json = JSON.parse(data)
+          const delta = json.choices?.[0]?.delta || {}
+          const finish = json.choices?.[0]?.finish_reason
+
+          if (delta.content) {
+            fullContent += delta.content
+            if (firstChunk) {
+              typingDiv.remove()
+              const bubbleDiv = document.createElement('div')
+              bubbleDiv.className = 'msg assistant'
+              bubbleDiv.innerHTML = '<div class="avatar">A</div><div class="bubble"></div>'
+              chatEl.appendChild(bubbleDiv)
+              const bubble = bubbleDiv.querySelector('.bubble')
+              bubble.appendChild(renderMarkdown(fullContent))
+              firstChunk = false
+            } else {
+              const lastMsg = chatEl.querySelector('.msg.assistant:last-child .bubble')
+              if (lastMsg) {
+                lastMsg.innerHTML = ''
+                lastMsg.appendChild(renderMarkdown(fullContent))
+              }
+            }
+            scrollToBottom()
+          }
+
+          if (finish === 'stop' || finish === 'length') {
+            if (fullContent === '' && !firstChunk) {
+              typingDiv.remove()
+              const bubbleDiv = document.createElement('div')
+              bubbleDiv.className = 'msg assistant'
+              bubbleDiv.innerHTML = '<div class="avatar">A</div><div class="bubble"></div>'
+              chatEl.appendChild(bubbleDiv)
+              bubbleDiv.querySelector('.bubble').appendChild(renderMarkdown(fullContent))
+            }
+          }
+        } catch(e) {}
+      }
+    }
+  } catch (err) {
+    typingDiv.remove()
+    if (err.name === 'AbortError') {
+      const d = document.createElement('div')
+      d.className = 'msg system'
+      d.innerHTML = '<div class="bubble">⏸ 已停止生成</div>'
+      chatEl.appendChild(d)
+    } else {
+      const d = document.createElement('div')
+      d.className = 'msg system'
+      d.innerHTML = `<div class="bubble" style="color:#ef4444">请求失败：${escapeHtml(err.message)}</div>`
+      chatEl.appendChild(d)
+    }
+  } finally {
+    isGenerating = false
+    sendBtn.disabled = false
+    stopBtn.classList.remove('show')
+    abortController = null
+
+    if (fullContent) {
+      storeMessage('assistant', fullContent)
+    }
+  }
+}
+
+function stopGeneration() {
+  if (abortController) abortController.abort()
+}
+
+async function aiExtractQuestions() {
+  if (!rawMd) { showToast('请先加载 MD 文件'); return }
+  const key = apiKey.value.trim()
+  const base = apiBase.value.trim()
+  if (!key || !base) { showToast('请先在设置中配置 API'); return }
+
+  const btn = document.getElementById('aiExtractBtn')
+  btn.disabled = true
+  btn.innerHTML = '<span style="display:inline-flex;gap:4px;align-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>提取中...</span>'
+
+  try {
+    const resp = await fetch(`${base.replace(/\/+$/, '')}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({
+        model: modelInput.value,
+        messages: [
+          { role: 'system', content: '你是严格JSON提取器。只做一件事：从用户提供的资料中提取所有题目，输出一个JSON数组。\n\n你必须严格遵守以下规则：\n1. 只输出JSON数组本身，禁止任何其他文字、解释、注释\n2. 禁止使用markdown代码块包裹（不要```json和```）\n3. 数组元素格式：\n{\n  "number": 1,\n  "title": "物质的定义",\n  "section": "第一章 世界的物质性",\n  "content": "物质是客观实在的哲学范畴..."\n}\n\n说明：\n- number: 题号（数字）\n- title: 题目完整名称\n- section: 所属章节，如"第一章 世界的物质性"、"第二章 认识论"，根据资料中的章节目录判断。注意：不要使用"名词解释""简答""论述"等题型分类作为section，要用章节名。\n- content: 该题对应的答案原文，完整提取不要截断\n4. 提取全部题目，一个不能少\n5. 如果某题没有答案原文，content填空字符串\n\n现在只输出JSON数组，不要任何其他内容。' },
+          { role: 'user', content: rawMd }
+        ],
+        max_tokens: 16384,
+        temperature: 0.05
+      })
+    })
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${await resp.text()}`)
+
+    const data = await resp.json()
+    let text = data.choices[0].message.content.trim()
+
+    let extracted = null
+    const extractors = [
+      () => JSON.parse(text),
+      () => JSON.parse(text.replace(/^```(?:json)?\s*|```\s*$/gi, '').trim()),
+      () => { const m = text.match(/\[[\s\S]*?\]/); return m ? JSON.parse(m[0]) : null },
+    ]
+    for (const fn of extractors) {
+      try { extracted = fn(); if (extracted) break } catch {}
+    }
+    if (!extracted) throw new Error('AI 返回格式错误，请重试')
+
+    if (!Array.isArray(extracted) || extracted.length === 0)
+      throw new Error('未提取到任何题目')
+
+    questions = extracted.map((q, i) => ({
+      number: q.number || i + 1,
+      title: q.title || '未知题目',
+      section: q.section || '',
+      content: q.content || '',
+      raw: ''
+    }))
+
+    questionChats = {}
+    hasSentIntro = {}
+    currentQuestionIdx = 0
+    leftContent.style.display = 'none'
+    document.getElementById('questionList').style.display = 'block'
+    renderQuestionList()
+    showQuestion(0)
+    renderCurrentChat()
+    showToast(`AI 提取完成：共 ${questions.length} 道题目`)
+  } catch (err) {
+    showToast('AI 提取失败: ' + err.message.slice(0, 120))
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'AI 提取题目'
+  }
+}
+
+function showToast(msg) {
+  const old = document.querySelector('.toast')
+  if (old) old.remove()
+  const el = document.createElement('div')
+  el.className = 'toast'
+  el.textContent = msg
+  document.body.appendChild(el)
+  setTimeout(() => el.remove(), 2000)
+}
+
+// Init
+inputEl.focus()
+</script>
+</body>
+</html>
