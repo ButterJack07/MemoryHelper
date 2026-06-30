@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI MHelper</title>
+<title>M-Helper-2</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f6f8;color:#1a1a2e;height:100vh;display:flex;flex-direction:column;overflow:hidden}
@@ -247,8 +248,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 
 <div class="header">
   <div class="header-left">
-    <div class="logo-icon">M</div>
-    <h1><span>MHelper</span></h1>
+    <div class="logo-icon">M2</div>
+    <h1><span>M-Helper-2</span></h1>
   </div>
   <div class="header-center">
     <div class="mode-group">
@@ -260,8 +261,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
   <div class="header-right">
     <label class="file-label">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-      选择 MD 文件
+      MD
       <input type="file" accept=".md,.markdown,text/markdown,text/plain" onchange="loadFile(event)">
+    </label>
+    <label class="file-label" style="background:var(--accent);color:#fff;border-color:var(--accent)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      PDF
+      <input type="file" accept=".pdf,application/pdf" onchange="loadPdfFile(event)">
     </label>
     <span class="file-name" id="fileName"></span>
     <button class="btn btn-sm" onclick="forgetFile()" title="忘记已保存的文件" style="font-size:13px;padding:2px 8px;line-height:1">×</button>
@@ -546,6 +552,65 @@ function loadFile(e) {
     inputEl.focus()
   }
   reader.readAsText(file, 'UTF-8')
+}
+
+// === PDF upload & conversion ===
+async function loadPdfFile(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  fileName.textContent = file.name
+  const btn = e.target.closest('.file-label')
+  const origText = btn.innerHTML
+  btn.innerHTML = '解析中...'
+  btn.style.pointerEvents = 'none'
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+    const ab = await file.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data: ab }).promise
+    const total = pdf.numPages
+    let text = ''
+    for (let i = 1; i <= total; i++) {
+      btn.innerHTML = `解析中 ${i}/${total}`
+      const page = await pdf.getPage(i)
+      const content = await page.getTextContent()
+      const lines = content.items.map(x => x.str)
+      let lastY = null
+      for (const item of content.items) {
+        const y = Math.round(item.transform[5])
+        if (lastY !== null && Math.abs(y - lastY) > 12) text += '\n'
+        else if (lastY !== null) text += ' '
+        text += item.str
+        lastY = y
+      }
+      text += '\n\n'
+    }
+    if (!text.trim()) throw new Error('未能从 PDF 中提取到文字')
+    rawMd = text
+    localStorage.setItem(KEYS.CONTENT, rawMd)
+    localStorage.setItem(KEYS.FNAME, file.name.replace(/\.pdf$/i, '.md'))
+    questions = []
+    doneQuestions = new Set()
+    saveProgress()
+    document.getElementById('leftPanel').classList.toggle('narrow', currentMode === 'quiz')
+    document.getElementById('questionList').style.display = 'none'
+    document.getElementById('cardContainer').classList.remove('show')
+    document.getElementById('aiExtractBtn').style.display = (currentMode === 'quiz' || currentMode === 'outline') && !!rawMd ? 'inline-flex' : 'none'
+    leftContent.style.display = ''
+    if (currentMode === 'assist') {
+      renderMd()
+    } else {
+      leftContent.innerHTML = '<div class="empty-questions"><p>PDF 已提取文字，点击「AI 提取题目」识别文档结构</p></div>'
+      leftContent.style.display = ''
+    }
+    renderCurrentChat()
+    showToast(`PDF 解析完成 ✅ 共 ${total} 页，${(text.length / 10000).toFixed(1)} 万字`)
+  } catch (err) {
+    showToast('PDF 解析失败: ' + err.message.slice(0, 80))
+  } finally {
+    btn.innerHTML = origText
+    btn.style.pointerEvents = ''
+    e.target.value = ''
+  }
 }
 
 // === Render MD (assist mode) ===
