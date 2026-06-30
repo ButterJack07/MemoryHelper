@@ -58,6 +58,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 .left-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 .left-content h1,.left-content h2,.left-content h3,.left-content h4{color:var(--text);margin:16px 0 8px}
 .question-list{flex:1;overflow-y:auto;padding:6px 0}
+.question-list.outline-mode{flex:0 0 auto;max-height:40%}
 .question-list::-webkit-scrollbar{width:6px}
 .question-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 .ql-section{padding:5px 16px 3px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg2);border-bottom:1px solid var(--border);margin-top:4px;position:sticky;top:0;z-index:1}
@@ -70,6 +71,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 .ql-item .ql-num{color:var(--text3);font-size:12px;min-width:22px;flex-shrink:0}
 .ql-item.active .ql-num{color:var(--accent)}
 #aiExtractBtn:disabled{opacity:.5;cursor:wait}
+.outline-toggle{display:none;gap:4px;margin-left:8px;flex-shrink:0}
+.outline-toggle.show{display:inline-flex}
+.outline-toggle button{padding:3px 10px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;font-size:12px;color:var(--text2);transition:.1s;font-family:inherit}
+.outline-toggle button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.card-container{display:none;flex-direction:column;flex:1;overflow:hidden}
+.card-container.show{display:flex}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.card-header .card-title{font-size:15px;font-weight:600;color:var(--text)}
+.card-header .card-section{font-size:12px;color:var(--text3);margin-top:2px}
+.card-header .card-nav{display:flex;align-items:center;gap:8px;font-size:13px}
+.card-header .card-nav button{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:.1s}
+.card-header .card-nav button:hover:not(:disabled){background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.card-header .card-nav button:disabled{opacity:.3;cursor:default}
+.card-header .card-nav #cardFavBtn{font-size:18px;line-height:1;border-color:transparent;background:transparent;width:32px}
+.card-header .card-nav #cardFavBtn.faved{color:#f59e0b}
+.card-filter-bar{display:flex;gap:4px;padding:6px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.card-filter-btn{padding:3px 12px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;font-size:12px;color:var(--text2);transition:.1s;font-family:inherit}
+.card-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.card-body{flex:1;overflow-y:auto;padding:20px;line-height:1.8;font-size:14px;color:var(--text);cursor:pointer}
+.card-body:hover{background:var(--bg2)}
+.card-body h1{font-size:1.1em;color:var(--text2);font-weight:400;margin-bottom:12px}
+.card-answer{display:none;margin:0 20px 20px;padding:16px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);line-height:1.8;font-size:14px;overflow-y:auto;flex-shrink:0;max-height:50%}
+.card-answer.show{display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
 .left-content h2{padding-bottom:6px;border-bottom:2px solid var(--accent-light)}
 .left-content p{margin:6px 0}
@@ -173,6 +197,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 
 /* Toast */
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;animation:fadeIn .2s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
+/* Mobile */
+@media(max-width:768px){
+.header{padding:0 12px;height:50px;overflow-x:auto;gap:6px}
+.header h1{font-size:15px;white-space:nowrap}
+.header-center{gap:4px;flex:initial}
+.mode-btn{padding:5px 10px;font-size:12px}
+.header-right{gap:4px}
+.file-label{font-size:12px;padding:5px 10px}
+.file-name{max-width:80px;font-size:11px}
+.btn-sm{padding:3px 8px;font-size:11px}
+.main{flex-direction:column;height:calc(100vh - 50px)}
+.left-panel,.left-panel.narrow{flex:1 1 auto;width:100%!important;border-right:none;border-bottom:1px solid var(--border);max-height:50%}
+.left-panel.full{max-height:100%!important}
+.right-panel{flex:1 1 auto;width:100%!important;min-height:50%}
+.left-header{padding:8px 12px}
+.left-content{padding:12px;font-size:14px;line-height:1.6}
+.left-content h1{font-size:1.5em}
+.ql-section{padding:4px 12px 2px}
+.ql-item{padding:6px 12px;font-size:12px}
+.chat{padding:8px 10px}
+.msg .bubble{font-size:13px;padding:6px 10px}
+.input-area{padding:8px 10px 10px}
+.preset-btn{font-size:11px;padding:3px 8px}
+.modal{width:95vw;padding:16px}
+.toast{font-size:12px;padding:8px 16px;bottom:20px}
+.outline-toggle button{font-size:11px;padding:2px 7px}
+.card-header{padding:8px 12px}
+.card-header .card-title{font-size:14px}
+.card-filter-bar{padding:4px 12px}
+.card-filter-btn{font-size:11px;padding:2px 8px}
+.card-body{padding:12px;font-size:14px}
+.card-answer{margin:0 12px 12px;padding:12px;font-size:13px}
+}
+@media(max-width:480px){
+.header h1{font-size:13px}
+.mode-btn{padding:4px 7px;font-size:11px}
+.btn{font-size:12px;padding:4px 8px}
+.icon-btn{width:28px;height:28px;font-size:13px}
+.left-content{padding:8px;font-size:13px}
+.left-content h1{font-size:1.3em}
+.msg .bubble{font-size:12px}
+.preset-btn{font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -184,8 +252,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
   </div>
   <div class="header-center">
     <div class="mode-group">
-      <button class="mode-btn active" data-mode="assist" onclick="switchMode('assist')">辅助模式</button>
-      <button class="mode-btn" data-mode="quiz" onclick="switchMode('quiz')">问答模式</button>
+      <button class="mode-btn" data-mode="assist" onclick="switchMode('assist')">辅助</button>
+      <button class="mode-btn active" data-mode="quiz" onclick="switchMode('quiz')">问答</button>
+      <button class="mode-btn" data-mode="outline" onclick="switchMode('outline')">提纲</button>
     </div>
   </div>
   <div class="header-right">
@@ -208,6 +277,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
     <div class="left-header">
       <div style="display:flex;align-items:center;gap:8px">
         <span id="leftHeaderTitle">参考材料</span>
+        <div class="outline-toggle" id="outlineToggle">
+          <button class="active" data-view="all" onclick="setOutlineView('all')">全部显示</button>
+          <button data-view="card" onclick="setOutlineView('card')">卡片模式</button>
+        </div>
         <button class="btn btn-sm" id="aiExtractBtn" onclick="aiExtractQuestions()" style="display:none">AI 提取题目</button>
       </div>
       <div class="question-nav" id="questionNav" style="display:none">
@@ -223,6 +296,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
       </div>
     </div>
     <div class="question-list" id="questionList" style="display:none"></div>
+    <div class="card-container" id="cardContainer">
+      <div class="card-header">
+        <div>
+          <div class="card-title" id="cardTitle">题目</div>
+          <div class="card-section" id="cardSection"></div>
+        </div>
+        <div class="card-nav">
+          <button id="cardFavBtn" onclick="toggleFav()" title="收藏" style="font-size:16px;width:32px">☆</button>
+          <button id="cardPrevBtn" onclick="prevCard()">&larr;</button>
+          <span id="cardNavLabel">1 / 1</span>
+          <button id="cardNextBtn" onclick="nextCard()">&rarr;</button>
+        </div>
+      </div>
+      <div class="card-filter-bar" id="cardFilterBar">
+        <button class="card-filter-btn active" data-filter="all" onclick="setCardFilter('all')">全部</button>
+        <button class="card-filter-btn" data-filter="fav" onclick="setCardFilter('fav')">收藏夹</button>
+      </div>
+      <div class="card-answer" id="cardAnswer"></div>
+      <div class="card-body" id="cardBody" onclick="toggleAnswer()"></div>
+    </div>
   </div>
 
   <div class="right-panel" id="rightPanel">
@@ -300,13 +393,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 // === State ===
 let rawMd = ''
 let questions = []
-let currentMode = 'assist'
+let currentMode = 'quiz'
 let currentQuestionIdx = -1
 let questionChats = {}  // { idx: [messages] }
 let doneQuestions = new Set()  // indices of manually marked complete
 let isGenerating = false
 let abortController = null
 let hasSentIntro = {}  // { idx: true }
+let outlineViewMode = localStorage.getItem('mhelper_outline_view') || 'all'
+let cardAnswerVisible = false
+let favoritedQuestions = new Set(JSON.parse(localStorage.getItem('mhelper_favorites') || '[]'))
+let cardFilter = 'all' // 'all' | 'fav'
+let lastAllModeIdx = 0
 
 const KEYS = {
   API_BASE: 'mksz_api_base',
@@ -364,30 +462,45 @@ function toggleModal() {
 // === Mode ===
 function switchMode(mode) {
   currentMode = mode
+  const rightPanel = document.getElementById('rightPanel')
+  const isOutline = mode === 'outline'
+  rightPanel.style.display = isOutline ? 'none' : 'flex'
   document.getElementById('leftPanel').classList.toggle('narrow', mode === 'quiz')
+  document.getElementById('leftPanel').classList.toggle('full', isOutline)
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode))
   assistContext.style.display = mode === 'assist' ? 'block' : 'none'
   quizContext.style.display = mode === 'quiz' ? 'block' : 'none'
   questionNav.style.display = mode === 'quiz' && questions.length > 0 ? 'flex' : 'none'
   selectionDisplay.classList.toggle('show', false)
-  document.getElementById('questionList').style.display = mode === 'quiz' && questions.length > 0 ? 'block' : 'none'
+  document.getElementById('questionList').style.display = (mode === 'quiz' || mode === 'outline') && questions.length > 0 ? 'block' : 'none'
   leftContent.style.display = mode === 'assist' || !questions.length ? '' : 'none'
-  document.getElementById('aiExtractBtn').style.display = mode === 'quiz' && !!rawMd ? 'inline-flex' : 'none'
+  document.getElementById('aiExtractBtn').style.display = (mode === 'quiz' || mode === 'outline') && !!rawMd ? 'inline-flex' : 'none'
 
   if (mode === 'assist') {
     leftHeader.textContent = '参考材料'
+    document.getElementById('cardContainer').classList.remove('show')
     renderMd()
     renderCurrentChat()
   } else {
-    leftHeader.textContent = '题目列表'
+    leftHeader.textContent = mode === 'outline' ? '提纲' : '题目列表'
+    document.getElementById('outlineToggle').classList.toggle('show', mode === 'outline')
     if (questions.length > 0) {
       if (currentQuestionIdx === -1) currentQuestionIdx = 0
-      showQuestion(currentQuestionIdx)
+      if (mode === 'outline') {
+        outlineViewMode = 'all'
+        localStorage.setItem('mhelper_outline_view', 'all')
+        document.querySelectorAll('.outline-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === 'all'))
+        renderOutline()
+      } else {
+        document.getElementById('cardContainer').classList.remove('show')
+        showQuestion(currentQuestionIdx)
+      }
     } else {
       leftContent.innerHTML = '<div class="empty-questions"><p>未检测到题目，请确认 MD 文件格式正确</p></div>'
       leftContent.style.display = ''
       document.getElementById('questionList').style.display = 'none'
-      renderCurrentChat()
+      document.getElementById('cardContainer').classList.remove('show')
+      if (!isOutline) renderCurrentChat()
     }
   }
   inputEl.focus()
@@ -403,12 +516,13 @@ function loadFile(e) {
     rawMd = ev.target.result
     localStorage.setItem(KEYS.CONTENT, rawMd)
     localStorage.setItem(KEYS.FNAME, file.name)
-    questions = parseQuestions(rawMd)
+    questions = []
     doneQuestions = new Set()
     saveProgress()
     document.getElementById('leftPanel').classList.toggle('narrow', currentMode === 'quiz')
     document.getElementById('questionList').style.display = 'none'
-    document.getElementById('aiExtractBtn').style.display = currentMode === 'quiz' ? 'inline-flex' : 'none'
+    document.getElementById('cardContainer').classList.remove('show')
+    document.getElementById('aiExtractBtn').style.display = (currentMode === 'quiz' || currentMode === 'outline') && !!rawMd ? 'inline-flex' : 'none'
     leftContent.style.display = ''
     if (currentMode === 'assist') {
       renderMd()
@@ -432,87 +546,6 @@ function loadFile(e) {
     inputEl.focus()
   }
   reader.readAsText(file, 'UTF-8')
-}
-
-function parseQuestions(md) {
-  const lines = md.split('\n')
-  const questions = []
-  let currentChapter = ''
-  let currentSection = ''
-  let current = null
-
-  const chapterRe = /^#{1,3}\s*(第[一二三四五六七八九十百]+[章节部分篇]|模块[一二三四五六七八九十百]+)\s*(.*)/
-  const subSectionRe = /^#{1,3}\s*[一二三四五六七八九十百]+[、.．]\s*(.+)/
-  const questionRe = /^(?:\*{1,2})?(\d+)[.、．](?:\*{0,2})\s*(.+?)(?:\*{0,2}\s*)?$/
-
-  for (const raw of lines) {
-    const line = raw.trimEnd()
-
-    const cm = line.match(chapterRe)
-    if (cm) {
-      currentChapter = ((cm[2] || cm[1]).trim())
-      currentSection = ''
-      continue
-    }
-
-    const sm = line.match(subSectionRe)
-    if (sm) {
-      currentSection = sm[1].trim()
-      continue
-    }
-
-    const qm = line.match(questionRe)
-    if (qm) {
-      if (current) questions.push(current)
-      const num = parseInt(qm[1])
-      current = {
-        number: num,
-        title: qm[2].trim(),
-        section: currentChapter || currentSection,
-        content: '',
-        raw: line
-      }
-      continue
-    }
-
-    if (current) {
-      current.content += line + '\n'
-    }
-  }
-  if (current) questions.push(current)
-
-  // Also detect bold-style questions like **1. 物质**
-  const altRe = /^\*\*(\d+)[.、．]\s*(.+?)\*\*/
-  for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(altRe)
-    if (m) {
-      const num = parseInt(m[1])
-      if (!questions.find(q => q.number === num && q.title === m[2].trim())) {
-        let content = ''
-        for (let j = i + 1; j < lines.length; j++) {
-          if (lines[j].match(altRe) || lines[j].match(questionRe)) break
-          content += lines[j] + '\n'
-        }
-        questions.push({
-          number: num,
-          title: m[2].trim(),
-          section: '',
-          content: content.trim(),
-          raw: lines[i]
-        })
-      }
-    }
-  }
-
-  questions.sort((a, b) => {
-    const secOrder = { '名词解释': 0, '简答': 1, '论述': 2, '辨析': 3 }
-    const sa = Object.keys(secOrder).find(k => a.section.includes(k))
-    const sb = Object.keys(secOrder).find(k => b.section.includes(k))
-    if (sa !== sb) return (secOrder[sa] ?? 99) - (secOrder[sb] ?? 99)
-    return a.number - b.number
-  })
-
-  return questions
 }
 
 // === Render MD (assist mode) ===
@@ -609,8 +642,139 @@ function renderQuestionList() {
     item.appendChild(status)
     item.appendChild(num)
     item.appendChild(title)
-    item.onclick = () => showQuestion(i)
+    item.onclick = function() {
+      if (currentMode === 'outline' && outlineViewMode === 'card') {
+        showCard(i)
+      } else {
+        showQuestion(i)
+      }
+    }
     el.appendChild(item)
+  }
+}
+
+// === Outline mode ===
+function setOutlineView(mode) {
+  outlineViewMode = mode
+  localStorage.setItem('mhelper_outline_view', mode)
+  document.querySelectorAll('.outline-toggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === mode)
+  })
+  renderOutline()
+}
+
+function renderOutline() {
+  document.getElementById('questionList').style.display = 'none'
+  document.getElementById('cardContainer').classList.toggle('show', outlineViewMode === 'card')
+  if (outlineViewMode === 'all') {
+    leftContent.style.display = 'block'
+    const groups = {}
+    for (const q of questions) {
+      const sec = q.section || '其他'
+      if (!groups[sec]) groups[sec] = []
+      groups[sec].push(q)
+    }
+    let md = ''
+    for (const [section, qs] of Object.entries(groups)) {
+      md += `## ${section}\n\n`
+      for (const q of qs) {
+        md += `### ${q.number}. ${q.title}\n\n${q.content.trim()}\n\n---\n\n`
+      }
+    }
+    leftContent.innerHTML = marked.parse(md, { breaks: true, gfm: true })
+    leftContent.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b))
+  } else {
+    leftContent.style.display = 'none'
+    cardFilter = 'all'
+    document.querySelectorAll('.card-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'))
+    const idx = favoritedQuestions.size > 0 ? Math.min(...favoritedQuestions) : 0
+    showCard(currentQuestionIdx >= 0 && currentQuestionIdx < questions.length ? currentQuestionIdx : idx)
+  }
+}
+
+function showCard(idx) {
+  if (idx < 0 || idx >= questions.length) return
+  currentQuestionIdx = idx
+  const q = questions[idx]
+  document.getElementById('cardTitle').textContent = `${q.number}. ${q.title}`
+  document.getElementById('cardSection').textContent = q.section || ''
+
+  const favBtn = document.getElementById('cardFavBtn')
+  favBtn.textContent = favoritedQuestions.has(idx) ? '★' : '☆'
+  favBtn.classList.toggle('faved', favoritedQuestions.has(idx))
+
+  const favIndices = getFilteredIndices()
+  const pos = favIndices.indexOf(idx)
+  const total = favIndices.length
+  document.getElementById('cardNavLabel').textContent = `${pos + 1} / ${total}`
+  document.getElementById('cardPrevBtn').disabled = pos <= 0
+  document.getElementById('cardNextBtn').disabled = pos >= total - 1
+
+  document.getElementById('cardTitle').textContent = `${q.number}. ${q.title}`
+  cardAnswerVisible = false
+  const answerEl = document.getElementById('cardAnswer')
+  answerEl.classList.remove('show')
+  answerEl.innerHTML = marked.parse(q.content, { breaks: true, gfm: true })
+  answerEl.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b))
+}
+
+function toggleAnswer() {
+  cardAnswerVisible = !cardAnswerVisible
+  document.getElementById('cardAnswer').classList.toggle('show', cardAnswerVisible)
+}
+
+function nextCard() {
+  const indices = getFilteredIndices()
+  const pos = indices.indexOf(currentQuestionIdx)
+  if (pos < indices.length - 1) showCard(indices[pos + 1])
+}
+
+function prevCard() {
+  const indices = getFilteredIndices()
+  const pos = indices.indexOf(currentQuestionIdx)
+  if (pos > 0) showCard(indices[pos - 1])
+}
+
+function getFilteredIndices() {
+  if (cardFilter === 'fav') {
+    const f = [...favoritedQuestions].filter(i => i < questions.length).sort((a, b) => a - b)
+    return f.length > 0 ? f : [0]
+  }
+  return questions.map((_, i) => i)
+}
+
+function toggleFav() {
+  const idx = currentQuestionIdx
+  if (favoritedQuestions.has(idx)) {
+    favoritedQuestions.delete(idx)
+    localStorage.setItem('mhelper_favorites', JSON.stringify([...favoritedQuestions]))
+    if (cardFilter === 'fav' && favoritedQuestions.size === 0) {
+      showToast('已取消收藏，回到全部模式')
+      setCardFilter('all')
+      return
+    }
+  } else {
+    favoritedQuestions.add(idx)
+    localStorage.setItem('mhelper_favorites', JSON.stringify([...favoritedQuestions]))
+  }
+  showCard(idx)
+}
+
+function setCardFilter(filter) {
+  if (filter === 'fav' && favoritedQuestions.size === 0) {
+    showToast('收藏夹为空，请先收藏题目')
+    return
+  }
+  if (filter === 'fav') lastAllModeIdx = currentQuestionIdx
+  cardFilter = filter
+  document.querySelectorAll('.card-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter))
+  if (filter === 'all') {
+    showCard(lastAllModeIdx >= 0 && lastAllModeIdx < questions.length ? lastAllModeIdx : 0)
+  } else {
+    const indices = getFilteredIndices()
+    const curPos = indices.indexOf(currentQuestionIdx)
+    if (curPos === -1) showCard(indices[0])
+    else showCard(currentQuestionIdx)
   }
 }
 
@@ -973,7 +1137,7 @@ async function aiExtractQuestions() {
       body: JSON.stringify({
         model: modelInput.value || 'deepseek-chat',
         messages: [
-          { role: 'system', content: '你是严格JSON提取器。只做一件事：从用户提供的资料中提取所有题目，输出一个JSON数组。\n\n你必须严格遵守以下规则：\n1. 只输出JSON数组本身，禁止任何其他文字、解释、注释\n2. 禁止使用markdown代码块包裹（不要```json和```）\n3. 数组元素格式：\n{\n  "number": 1,\n  "title": "物质的定义",\n  "section": "第一章 世界的物质性",\n  "content": "物质是客观实在的哲学范畴..."\n}\n\n说明：\n- number: 题号（数字）\n- title: 题目完整名称\n- section: 所属章节，如"第一章 世界的物质性"、"第二章 认识论"，根据资料中的章节目录判断。注意：不要使用"名词解释""简答""论述"等题型分类作为section，要用章节名。\n- content: 该题对应的答案原文，完整提取不要截断\n4. 提取全部题目，一个不能少\n5. 如果某题没有答案原文，content填空字符串\n\n现在只输出JSON数组，不要任何其他内容。' },
+          { role: 'system', content: '提取文档中的知识点条目，输出JSON数组。\n\n规则：\n1. 只输出JSON数组，禁止任何其他内容，不要```json包裹\n2. 格式：[{"number":1,"title":"条目名","section":"章节","content":"正文"}]\n3. 先看文档是否有#标题层级：有则#/##为section，###/编号项为title，下方正文为content\n4. 无#标题则看是否有"一、""1."等编号体系，按编号分组\n5. 提取全部，content完整不截断，无正文填空串\n6. 按出现顺序从1编号' },
           { role: 'user', content: rawMd }
         ],
         max_tokens: 16384,
@@ -1039,6 +1203,7 @@ function forgetFile() {
   leftContent.innerHTML = '<div class="no-file"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><p>点击右上角「选择 MD 文件」加载复习资料</p></div>'
   leftContent.style.display = ''
   document.getElementById('questionList').style.display = 'none'
+  document.getElementById('cardContainer').classList.remove('show')
   document.getElementById('aiExtractBtn').style.display = 'none'
   document.getElementById('leftPanel').classList.remove('narrow')
   chatEl.innerHTML = '<div class="msg system"><div class="bubble">在左侧 MD 中划选文字，然后问我问题。也可以直接输入任何问题。</div></div>'
@@ -1072,11 +1237,26 @@ if (savedContent) {
       doneQuestions = new Set(parsed.done || [])
     }
   } else {
-    questions = parseQuestions(rawMd)
+    questions = []
   }
   document.getElementById('leftPanel').classList.toggle('narrow', currentMode === 'quiz')
+  document.getElementById('leftPanel').classList.toggle('full', currentMode === 'outline')
+  document.getElementById('rightPanel').style.display = currentMode === 'outline' ? 'none' : 'flex'
   if (currentMode === 'assist') {
     renderMd()
+  } else if (currentMode === 'outline') {
+    document.getElementById('outlineToggle').classList.toggle('show', true)
+    document.querySelectorAll('.outline-toggle button').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === outlineViewMode)
+    })
+    if (rawMd) document.getElementById('aiExtractBtn').style.display = 'inline-flex'
+    if (questions.length > 0) {
+      currentQuestionIdx = 0
+      renderOutline()
+    } else {
+      document.getElementById('cardContainer').classList.remove('show')
+      leftContent.style.display = 'block'
+    }
   } else if (questions.length > 0) {
     currentQuestionIdx = 0
     leftContent.style.display = 'none'
@@ -1085,7 +1265,7 @@ if (savedContent) {
     renderQuestionList()
     showQuestion(0)
   }
-  renderCurrentChat()
+  if (currentMode !== 'outline') renderCurrentChat()
 }
 
 // Init
